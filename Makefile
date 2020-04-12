@@ -12,4 +12,4 @@ compprac2: main.o
 	$(LD) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lqbe
 
 clean:
-	rm -f main.o compprac1
+	rm -f main.o compprac2
