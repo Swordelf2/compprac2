@@ -1,0 +1,20 @@
+function $baz() {
+@start
+	%p.5 =l par
+	%q.6 =w par
+	%x.7 =w load %p.5
+	%w.8 =w mul %x.7, %x.7
+	%c =w ceqw %w.8, %x.7
+	jnz %c, @ret, @stor
+@stor
+	storew %w.8, %p.5
+	nop
+	jmp @ret2
+@ret
+	nop
+	nop
+	retw %p.5
+@ret2
+	nop
+	retw %q.6
+}

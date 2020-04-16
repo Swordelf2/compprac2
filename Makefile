@@ -2,7 +2,7 @@ all: compprac2
 
 CC=g++
 LD=g++
-CFLAGS=-g -std=gnu++17 -Wall -Wextra -Iqbe/include
+CFLAGS=-g -std=gnu++11 -Wall -Wextra -Iqbe/include
 LDFLAGS=-Lqbe/lib
 
 main.o: main.cpp
@@ -16,3 +16,4 @@ clean:
 
 %: input%.il compprac2
 	./compprac2 < input$@.il
+	cat output$@

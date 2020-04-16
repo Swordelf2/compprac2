@@ -1,18 +1,21 @@
-export function w $bar() {
+function w $baz(l %p, w %q) {
 @start
-    %x =w copy 1
-    jnz %x, @d1, @dn
-@d1
-    %x =w copy 2
-    jmp @end
-@dn
-    jnz %x, @d2, @d3
-@d2
-    %x =w copy 3
-    jmp @end
-@d3
-    %x =w copy 4
-    jmp @end
-@end
-    ret %x
+      %x =w loadw %p
+      %w =w mul %x, %x
+      %c =w ceqw %w, %x
+      jnz %c, @ret, @stor
+
+@stor
+      storew %w, %p
+      %z =w copy %w
+      jmp @ret2
+
+@ret
+      %z =w loadw %p
+      %z =w add %z, %x
+      ret %p
+
+@ret2
+      %z =w add %q, %q
+      ret %q
 }
