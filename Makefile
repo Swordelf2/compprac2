@@ -13,3 +13,6 @@ compprac2: main.o
 
 clean:
 	rm -f main.o compprac2
+
+%: input%.il compprac2
+	./compprac2 < input$@.il
