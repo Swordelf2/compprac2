@@ -20,6 +20,8 @@ extern "C" {
 #include <unordered_map>
 #include <utility>
 
+const uint END_BLOCK_ID = (1u << 31u) - 1;
+
 struct BlkInfo {
     Blk *blk;
     // If this block has already been visited during postorder traversal
@@ -67,7 +69,6 @@ bool operator==(const Use &use1, const Use &use2) {
 // Mapping from block_id to its BlkInfo struct
 std::unordered_map<uint, BlkInfo> id2blkinfo;
 std::vector<uint> rrpo;
-Blk *end_blk = nullptr;
 std::unordered_set<Use, UseHash> use_marks;
 // Mapping from a variable to its def (ssa => single def)
 std::unordered_map<uint, Use> tmp_def;
@@ -136,21 +137,18 @@ void postorder_traverse(Blk *blk) {
 }
 
 void build_rrpo(Fn *fn) {
-    // Find the end block
+    // Find all end blocks
     for (Blk *blk = fn->start; blk; blk = blk->link) {
         if (isret(blk->jmp.type)) {
-            end_blk = blk;
-            break;
+            // Mark it as visited
+            id2blkinfo[blk->id].visited = true;
+            postorder_traverse(blk);
+            // Immedately set its imm postdom to the imaginary end block
+            id2blkinfo[blk->id].rdom = END_BLOCK_ID;
         }
     }
-    if (!end_blk) {
-        std::cerr << "Could not find end block" << std::endl;
-        std::abort();
-    }
-    // Mark it as visited
-    id2blkinfo[end_blk->id].visited = true;
-    postorder_traverse(end_blk);
-    // Finalize creation of rrpo by reversing it
+    // Finalize creation of rrpo by adding the imaginary end block and reversing it
+    rrpo.push_back(END_BLOCK_ID);
     std::reverse(rrpo.begin(), rrpo.end());
     // Assign the rrpo indices in the BlkInfo structs
     for (uint i = 0; i < rrpo.size(); ++i) {
@@ -174,15 +172,13 @@ uint rdom_intersect(uint b1, uint b2) {
 
 // A simple. fast dominance algorithm ... 
 void build_rdom() {
-    for (uint id: rrpo) {
-        id2blkinfo[id].rdom = -1;
-    }
-    id2blkinfo[end_blk->id].rdom = end_blk->id;
+    // Set the imaginary end block's postdom equal to itself
+    id2blkinfo[rrpo[0]].rdom = rrpo[0];
     // Loop until nothing changes
     bool changed = true;
     while (changed) {
         changed = false;
-        // Iterate over all except end_blk
+        // Iterate over all blocks
         for (uint i = 1; i < rrpo.size(); ++i) {
             uint id = rrpo[i];
             BlkInfo &blk_info = id2blkinfo[id];
@@ -203,8 +199,8 @@ void build_rdom() {
             } else if (!s1p && s2p) {
                 new_rdom = blk_info.blk->s2->id;
             } else {
-                std::cerr << "Both blocks unprocessed" << std::endl;
-                std::abort();
+                // This is an end block, skip it
+                continue;
             }
             // Update the rdom
             if (new_rdom != blk_info.rdom) {
@@ -225,7 +221,9 @@ void rfron_runup(uint b, uint p) {
 }
 
 void build_rfron() {
-    for (uint id: rrpo) {
+    // Skip the imaginary end block
+    for (uint i = 1; i < rrpo.size(); ++i) {
+        uint id = rrpo[i];
         const BlkInfo &blk_info = id2blkinfo[id];
         if (blk_info.blk->s1 && blk_info.blk->s2) {
             rfron_runup(id, blk_info.blk->s1->id);
@@ -248,6 +246,9 @@ static void readfn (Fn *fn) {
         id2blkinfo.insert(std::make_pair(blk->id, blk_info));
     }
 
+    // Create an imaginary `end` block
+    id2blkinfo[END_BLOCK_ID] = BlkInfo { nullptr, false, -1, END_BLOCK_ID, 
+            std::unordered_set<uint>(), false };
     build_rrpo(fn);
     build_rdom();
     build_rfron();

@@ -1,0 +1,10 @@
+function $test() {
+@start
+	nop
+	nop
+@loop
+	nop
+@end
+	nop
+	ret0
+}
