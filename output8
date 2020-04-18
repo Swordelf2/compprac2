@@ -1,0 +1,25 @@
+function $test() {
+@start
+	%e.5.1 =l alloc8 8
+	%ie.6.2 =l alloc8 8
+@l10
+	jnz 1, @l11, @l12
+@l11
+	%t77 =l load %e.5.1
+	argl %t77
+	%t76 =w vacall $SDL_PollEvent
+	jnz %t76, @l13, @l14
+@l13
+	%t81 =l load %ie.6.2
+	%t80 =l add %t81, 0
+	%t79 =w load %t80
+	%t78 =w ceqw %t79, 769
+	jnz %t78, @l16, @l17
+@l16
+	jmp @l12
+@l17
+@l14
+	jmp @l10
+@l12
+	ret0
+}

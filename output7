@@ -1,0 +1,16 @@
+export function $sieve() {
+@fill0.cond
+	%n.1 =w par
+	%prime.6 =l par
+	nop
+	%cond1 =w csgtw %n.1, 0
+	jnz %cond1, @fill0.body, @fill2.header
+@fill0.body
+	storeb 0, %prime.6
+@fill0.exit
+	nop
+	nop
+	nop
+@fill2.header
+	ret0
+}

@@ -110,6 +110,12 @@ void mark_use(const Use &use) {
     }
 }
 
+// Retrieve block name by id
+const char *id2name(uint id) {
+    const BlkInfo &blk_info = id2blkinfo[id];
+    return blk_info.blk ? blk_info.blk->name : "end_block";
+}
+
 /*
 // Used to remove unreachable blocks
 void preorder_traverse(Blk *blk) {
@@ -282,11 +288,13 @@ static void readfn (Fn *fn) {
         // Instructions
         for (Ins *ins = blk->ins; ins < blk->ins + blk->nins; ++ins) {
             Use use = to_use(blk->id, ins);
-            if (isstore(ins->op)) {
+            // Store into memory instruction, or an argument to a function call,
+            // or a function call itself, all are critical
+            if (isstore(ins->op) || ins->op == Oarg || ins->op == Ocall || ins->op == Ovacall) {
                 mark_use(use);
-            }
-
-            if (ins->to.type == RTmp) {
+            } else if (ins->to.type == RTmp && ins->to.val != 0) {
+                // TODO: maybe don't need this != 0
+                // Otherwise just store the definition of a variable
                 if (!tmp_def.insert(std::make_pair(
                             static_cast<uint>(ins->to.val),
                             use)).second) {
@@ -322,7 +330,8 @@ static void readfn (Fn *fn) {
                 Ins *ins = use.u.ins;
                 for (uint i = 0; i < 2; ++i) {
                     Ref arg = ins->arg[i];
-                    if (arg.type == RTmp) {
+                    // TODO: maybe arg.val != 0 not needed here
+                    if (arg.type == RTmp && arg.val != 0) {
                         mark_use(tmp_def[arg.val]);
                     }
                 }
@@ -343,6 +352,19 @@ static void readfn (Fn *fn) {
         for (uint blk_id : blk_info.rfron) {
             mark_use(to_use(blk_id));
         }
+    }
+
+    /* Debug output */
+    for (uint id: rrpo) {
+        const BlkInfo &blk_info = id2blkinfo[id];
+        std::cout << "Block: " << id2name(id) << "  " << "id: " << id << std::endl;
+        std::cout << "rdom: " << id2name(blk_info.rdom) << std::endl;
+        std::cout << "rfron: ";
+        for (uint fron_elem : blk_info.rfron) {
+            std::cout << id2name(fron_elem) << ' ';
+        }
+        std::cout << "useful: " << blk_info.useful << std::endl;
+        std::cout << std::endl << std::endl;
     }
 
     /* Sweep */
