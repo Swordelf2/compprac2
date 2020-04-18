@@ -1,0 +1,130 @@
+export function $main() {
+@l0
+	%c.1 =l alloc4 4
+	%n.2 =l alloc4 4
+	%x.3 =l alloc4 4
+	%y.4 =l alloc4 4
+	%e.5 =l alloc8 8
+	%ie.6 =l alloc8 8
+	%col.7 =l alloc8 8
+	%W.8 =l alloc4 4
+	%H.9 =l alloc4 4
+	%rnd.10 =l alloc4 4
+	%win.11 =l alloc4 4
+	storew 800, %W.8
+	storew 800, %H.9
+	argw 32
+	%t4 =w vacall $SDL_Init
+	%t11 =w load %W.8
+	%t12 =w load %H.9
+	argl $glo1
+	argw 0
+	argw 0
+	argw %t11
+	argw %t12
+	argw 0
+	%t7 =w vacall $SDL_CreateWindow
+	storew %t7, %win.11
+	%t16 =w load %win.11
+	%t17 =w sub 0, 1
+	argw %t16
+	argw %t17
+	argw 0
+	%t15 =w vacall $SDL_CreateRenderer
+	storew %t15, %rnd.10
+	%t22 =l load %e.5
+	storel %t22, %ie.6
+	storew 20, %c.1
+	storew 0, %n.2
+@l1
+	%t28 =w load %n.2
+	%t27 =w csltw %t28, 200
+	jnz %t27, @l2, @l3
+@l2
+	%t31 =w load %c.1
+	%t33 =l load %col.7
+	%t34 =w load %n.2
+	%t35 =l extsw %t34
+	%t36 =l mul 4, %t35
+	%t32 =l add %t33, %t36
+	storew %t31, %t32
+	%t39 =w load %c.1
+	%t43 =w load %c.1
+	%t41 =w sub 255, %t43
+	%t40 =w div %t41, 8
+	%t38 =w add %t39, %t40
+	storew %t38, %c.1
+	%t46 =w load %n.2
+	%t45 =w add %t46, 1
+	storew %t45, %n.2
+	jmp @l1
+@l3
+	%t50 =l load %col.7
+	%t51 =w load %n.2
+	%t52 =l extsw %t51
+	%t53 =l mul 4, %t52
+	%t49 =l add %t50, %t53
+	storew 30, %t49
+	%t55 =w load %rnd.10
+	argw %t55
+	%t54 =w vacall $SDL_RenderClear
+	storew 0, %x.3
+@l4
+	%t59 =w load %x.3
+	%t60 =w load %W.8
+	%t58 =w csltw %t59, %t60
+	jnz %t58, @l5, @l6
+@l5
+	storew 0, %y.4
+@l7
+	%t64 =w load %y.4
+	%t65 =w load %H.9
+	%t63 =w csltw %t64, %t65
+	jnz %t63, @l8, @l9
+@l8
+	%t67 =w load %x.3
+	%t68 =w load %y.4
+	argw %t67
+	argw %t68
+	%t66 =w vacall $plot
+	%t70 =w load %y.4
+	%t69 =w add %t70, 1
+	storew %t69, %y.4
+	jmp @l7
+@l9
+	%t72 =w load %x.3
+	%t71 =w add %t72, 1
+	storew %t71, %x.3
+	jmp @l4
+@l6
+	%t74 =w load %rnd.10
+	argw %t74
+	%t73 =w vacall $SDL_RenderPresent
+@l10
+	jnz 1, @l11, @l12
+@l11
+	%t77 =l load %e.5
+	argl %t77
+	%t76 =w vacall $SDL_PollEvent
+	jnz %t76, @l13, @l14
+@l13
+	%t81 =l load %ie.6
+	%t80 =l add %t81, 0
+	%t79 =w load %t80
+	%t78 =w ceqw %t79, 769
+	jnz %t78, @l16, @l17
+@l16
+	jmp @l12
+@l17
+@l14
+	jmp @l10
+@l12
+	%t85 =w load %rnd.10
+	argw %t85
+	%t84 =w vacall $SDL_DestroyRenderer
+	%t87 =w load %win.11
+	argw %t87
+	%t86 =w vacall $SDL_DestroyWindow
+	%t88 =w vacall $SDL_Quit
+	retw 0
+}

@@ -16,4 +16,3 @@ clean:
 
 %: input%.il compprac2
 	./compprac2 < input$@.il
-	cat output$@

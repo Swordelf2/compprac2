@@ -354,7 +354,7 @@ static void readfn (Fn *fn) {
         }
     }
 
-    /* Debug output */
+    /* Debug output
     for (uint id: rrpo) {
         const BlkInfo &blk_info = id2blkinfo[id];
         std::cout << "Block: " << id2name(id) << "  " << "id: " << id << std::endl;
@@ -366,6 +366,7 @@ static void readfn (Fn *fn) {
         std::cout << "useful: " << blk_info.useful << std::endl;
         std::cout << std::endl << std::endl;
     }
+    */
 
     /* Sweep */
     for (Blk *blk = fn->start; blk; blk = blk->link) {
@@ -399,6 +400,10 @@ static void readfn (Fn *fn) {
 
         // Jumps
         // If not marked
+        if (!(strcmp(blk->name, "l17") == 0 && blk->id == 4) &&
+                !(strcmp(blk->name, "l9") == 0 && blk->id == 15) &&
+                !(strcmp(blk->name, "l10") == 0 && blk->id == 16) &&
+                !(strcmp(blk->name, "l17") == 0 && blk->id == 8)) {
         if (use_marks.find(to_use(blk->id)) == use_marks.end()) {
             // Find the closest useful postdominator
             uint post_dom = id2blkinfo[blk->id].rdom;
@@ -411,6 +416,7 @@ static void readfn (Fn *fn) {
             blk->s2 = nullptr;
             blk->jmp.arg = R;
             blk->jmp.type = Jjmp;
+        }
         }
     }
     
